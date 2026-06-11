@@ -48,10 +48,19 @@ def audit(binary: Path) -> list[str]:
 
 
 def main() -> int:
-    targets = [Path(p) for p in sys.argv[1:]] or [
-        Path(p) for p in glob.glob("bin/godot.*") if Path(p).is_file()
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    # --variant 2d targets only the disable_3d artifact (the ADR-0004 gate);
+    # without it, every bin/*.{guidot,godot}.* executable is audited.
+    if "--variant" in sys.argv:
+        i = sys.argv.index("--variant")
+        variant = sys.argv[i + 1] if i + 1 < len(sys.argv) else "2d"
+        pat = "bin/*.template_debug*" if variant == "2d" else "bin/godot.*"
+        args = [p for p in glob.glob(pat)]
+    targets = [Path(p) for p in args] or [
+        Path(p) for p in glob.glob("bin/godot.*") + glob.glob("bin/guidot.*")
     ]
-    targets = [t for t in targets if t.is_file() and t.stat().st_mode & 0o111]
+    targets = [t for t in targets if t.is_file() and t.stat().st_mode & 0o111
+               and not t.name.endswith((".dSYM", ".exp", ".lib"))]
     if not targets:
         print("symbol_audit: no binaries found (build first: pixi run build-2d)")
         return 2
