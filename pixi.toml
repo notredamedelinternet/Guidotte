@@ -20,7 +20,7 @@ build-2d = "scons target=template_debug dev_build=yes disable_3d=yes custom_modu
 build-gamedev = "scons target=editor dev_build=yes"
 build-tests = "scons target=editor dev_build=yes tests=yes custom_modules=guidot/modules"
 test = "python tools/guidot/run_engine_tests.py"
-audit-3d = "python tools/guidot/symbol_audit.py"
+audit-3d = "python tools/guidot/symbol_audit.py --variant 2d"
 clean = "scons -c"
 
 # macOS local-dev profile: Metal-only rendering, optional dep downloads disabled
