@@ -4,6 +4,8 @@
 
 #include "widget.h"
 
+#include "core/object/class_db.h"
+
 namespace guidot {
 
 void Widget::set_bounds(const Rect2 &p_bounds) {
