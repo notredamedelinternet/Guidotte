@@ -1,0 +1,40 @@
+[workspace]
+name = "guidot"
+version = "0.1.0"
+description = "Guidot — Godot re-exposed as a modular, language-agnostic UI framework (Pixi-orchestrated build)"
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64", "linux-aarch64"]
+
+[dependencies]
+python = "3.12.*"
+scons = ">=4.7"
+pkg-config = "*"
+
+# Variant table (Guidot-RnD ADR-0010 / Master Prompt §3.3):
+#   build         — full engine + guidot façade module (both namespace views)
+#   build-2d      — 2D-only template + façade module (ADR-0004 gate target)
+#   build-gamedev — upstream-equivalent build, no guidot code at all
+[tasks]
+build = "scons target=editor dev_build=yes custom_modules=guidot/modules"
+build-2d = "scons target=template_debug dev_build=yes disable_3d=yes custom_modules=guidot/modules"
+build-gamedev = "scons target=editor dev_build=yes"
+build-tests = "scons target=editor dev_build=yes tests=yes custom_modules=guidot/modules"
+test = "python tools/guidot/run_engine_tests.py"
+audit-3d = "python tools/guidot/symbol_audit.py"
+clean = "scons -c"
+
+# macOS local-dev profile: Metal-only rendering, optional dep downloads disabled
+# (MoltenVK/AccessKit/ANGLE SDKs not required; see misc/scripts/install_*.py to enable).
+[target.osx-arm64.tasks]
+build = "scons target=editor dev_build=yes custom_modules=guidot/modules vulkan=no accesskit=no angle=no"
+build-2d = "scons target=template_debug dev_build=yes disable_3d=yes custom_modules=guidot/modules vulkan=no accesskit=no angle=no"
+build-gamedev = "scons target=editor dev_build=yes vulkan=no accesskit=no angle=no"
+build-tests = "scons target=editor dev_build=yes tests=yes custom_modules=guidot/modules vulkan=no accesskit=no angle=no"
+
+[feature.languages.dependencies]
+rust = ">=1.78"
+zig = ">=0.13"
+
+[environments]
+default = []
+languages = ["languages"]
